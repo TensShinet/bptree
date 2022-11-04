@@ -6,7 +6,7 @@ import (
 )
 
 func TestBptree(t *testing.T) {
-	tree, _ := New(bptreeMinDegree)
+	tree, _ := New(5)
 
 	maxKey := 40
 

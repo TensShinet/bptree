@@ -55,7 +55,7 @@ func (t *Tree) Find(key int) (*Node, bool) {
 	return node, false
 }
 
-func (t *Tree) Insert(key int, value interface{}) {
+func (t *Tree) Insert(key int, value any) {
 	n, _ := t.Find(key)
 	t.insertInLeafNode(n, key, value)
 
@@ -82,7 +82,7 @@ func (t *Tree) Insert(key int, value interface{}) {
 	t.insertInParent(n, newNode.keys[0], newNode)
 }
 
-func (t *Tree) insertInLeafNode(n *Node, key int, value interface{}) {
+func (t *Tree) insertInLeafNode(n *Node, key int, value any) {
 	// TODO: binary search?
 	i := 0
 	for ; i < len(n.keys); i++ {
@@ -92,24 +92,16 @@ func (t *Tree) insertInLeafNode(n *Node, key int, value interface{}) {
 	}
 
 	if i == len(n.keys) {
-		n.keys = append(n.keys, key)
-		n.leafValues = append(n.leafValues, value)
+		insertInSlice(&n.keys, i, key)
+		insertInSlice(&n.leafValues, i, value)
 	} else {
 		if n.keys[i] == key {
 			// Update leaf value.
 			n.leafValues[i] = value
 			return
 		}
-		// Insert a key and a value to their slices separately to make two empty slots.
-		n.keys = append(n.keys, 0)
-		n.leafValues = append(n.leafValues, value)
-
-		for j := len(n.leafValues) - 2; j >= i; j-- {
-			n.keys[j+1], n.leafValues[j+1] = n.keys[j], n.leafValues[j]
-		}
-
-		// Insert the new key and the new value.
-		n.keys[i], n.leafValues[i] = key, value
+		insertInSlice(&n.keys, i, key)
+		insertInSlice(&n.leafValues, i, value)
 	}
 }
 
@@ -118,8 +110,9 @@ func (t *Tree) insertInParent(left *Node, key int, right *Node) {
 	if parent == nil {
 		// The left doesn't have a parent which means The left is the root node before.
 		newParent := newNonLeafNode(left.maxDegree)
-		newParent.keys = append(newParent.keys, key)
-		newParent.values = append(newParent.values, left, right)
+		insertInSlice(&newParent.keys, len(newParent.keys), key)
+		insertInSlice(&newParent.values, len(newParent.values), left)
+		insertInSlice(&newParent.values, len(newParent.values), right)
 
 		// Update the left and the right's parents
 		left.parent, right.parent = newParent, newParent
@@ -135,22 +128,8 @@ func (t *Tree) insertInParent(left *Node, key int, right *Node) {
 		}
 	}
 
-	if i == len(parent.keys) {
-		parent.keys = append(parent.keys, key)
-		parent.values = append(parent.values, right)
-	} else {
-		// Insert a key and a value to their slices separately to make two empty slots.
-		parent.keys = append(parent.keys, 0)
-		parent.values = append(parent.values, nil)
-
-		for j := len(parent.keys) - 2; j >= i; j-- {
-			// Notice: the length of values slice of non-leaf node is always one more than the length of keys slice
-			parent.keys[j+1], parent.values[j+2] = parent.keys[j], parent.values[j+1]
-		}
-
-		// Insert the new key and the new value.
-		parent.keys[i], parent.values[i+1] = key, right
-	}
+	insertInSlice(&parent.keys, i, key)
+	insertInSlice(&parent.values, i+1, right)
 
 	// Check if this parent node needs to be split.
 	if !parent.isFull() {
