@@ -2,6 +2,7 @@ package bptree
 
 import (
 	"github.com/stretchr/testify/assert"
+	"math/rand"
 	"sort"
 	"testing"
 )
@@ -9,7 +10,7 @@ import (
 func TestBptree(t *testing.T) {
 	tree, _ := New(5)
 
-	maxKey := 40
+	maxKey := 10000
 
 	for i := maxKey; i >= 0; i-- {
 		tree.Insert(i, i)
@@ -31,7 +32,7 @@ func remove(slice []int, idx int) []int {
 func TestBptreeDelete(t *testing.T) {
 	tree, _ := New(3)
 
-	maxKey := 100
+	maxKey := 10000
 	targetSlice := make([]int, 0, maxKey+1)
 
 	for i := maxKey; i >= 0; i-- {
@@ -43,18 +44,19 @@ func TestBptreeDelete(t *testing.T) {
 		return targetSlice[i] < targetSlice[j]
 	})
 
-	//deleteMap := make(map[int]bool)
-	for i := 0; i <= maxKey; i++ {
-		//deleteMap[rand.Intn(maxKey/2)] = true
-		tree.Delete(i)
+	for i := 0; i < maxKey; i++ {
+		dk := rand.Intn(maxKey + 1)
+		tree.Delete(dk)
 		idx := -1
 		for j := 0; j < len(targetSlice); j++ {
-			if i == targetSlice[j] {
+			if dk == targetSlice[j] {
 				idx = j
 				break
 			}
 		}
-		targetSlice = remove(targetSlice, idx)
+		if idx != -1 {
+			targetSlice = remove(targetSlice, idx)
+		}
 	}
 
 	allKeys := tree.getAllKeys()

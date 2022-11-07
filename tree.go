@@ -236,6 +236,10 @@ func (t *Tree) deleteEntry(n *Node, key int) {
 			leftNode.keys = append(leftNode.keys, middleKey)
 			leftNode.keys = append(leftNode.keys, rightNode.keys...)
 			leftNode.values = append(leftNode.values, rightNode.values...)
+
+			for _, child := range leftNode.values {
+				child.parent = leftNode
+			}
 		}
 		t.deleteEntry(parent, middleKey)
 	} else {
@@ -253,6 +257,7 @@ func (t *Tree) deleteEntry(n *Node, key int) {
 				// For the non-leaf nodes, in this case, borrow (middleKey, siblingNode.lastValue) from parent node and sibling node.
 				// Due to the change of first key of the non-leaf node, it needs to replace the key of the parent node by siblingNode.lastKey.
 				n.insertNonLeafKV(0, middleKey, 0, siblingNode.values[siblingValueIdx])
+				siblingNode.values[siblingValueIdx].parent = n
 				newK := siblingNode.keys[siblingKeyIdx]
 				siblingNode.deleteNonLeafKV(siblingKeyIdx, siblingValueIdx)
 				parent.replaceKey(nodeKeyInParentIdx, newK)
@@ -270,6 +275,7 @@ func (t *Tree) deleteEntry(n *Node, key int) {
 				// For the non-leaf nodes, in this case, borrow (middleKey, siblingNode.firstValue) from the sibling node.
 				// Due to the change of the first key of the sibling node, it needs to replace the key of the parent node by siblingNode.firstKey.
 				n.insertNonLeafKV(len(n.keys), middleKey, len(n.values), siblingNode.values[siblingValueIdx])
+				siblingNode.values[siblingValueIdx].parent = n
 				newK := siblingNode.keys[siblingKeyIdx]
 				siblingNode.deleteNonLeafKV(siblingKeyIdx, siblingValueIdx)
 				parent.replaceKey(nodeKeyInParentIdx, newK)

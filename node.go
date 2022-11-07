@@ -36,7 +36,7 @@ func (n *Node) hasTooLessKeys(maxDegree int) bool {
 		// This current node is the root.
 		return false
 	}
-	return (n.isLeaf && len(n.values) < ceil(maxDegree-1, 2)) ||
+	return (n.isLeaf && len(n.leafValues) < ceil(maxDegree-1, 2)) ||
 		(!n.isLeaf && len(n.values) < ceil(maxDegree, 2))
 }
 
