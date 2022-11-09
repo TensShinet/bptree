@@ -5,15 +5,33 @@ import (
 	"math/rand"
 	"sort"
 	"testing"
+	"time"
 )
 
-func TestBptree(t *testing.T) {
+func shuffle(slice []int) {
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	for len(slice) > 0 {
+		n := len(slice)
+		randIndex := r.Intn(n)
+		slice[n-1], slice[randIndex] = slice[randIndex], slice[n-1]
+		slice = slice[:n-1]
+	}
+}
+
+func TestBptreeInsert(t *testing.T) {
 	tree, _ := New(5)
 
 	maxKey := 10000
+	ukSlice := make([]int, 0, maxKey+1)
 
-	for i := maxKey; i >= 0; i-- {
-		tree.Insert(i, i)
+	for i := 0; i <= maxKey; i++ {
+		ukSlice = append(ukSlice, i)
+	}
+
+	shuffle(ukSlice)
+
+	for _, v := range ukSlice {
+		tree.Insert(v, v)
 	}
 
 	allKeys := tree.getAllKeys()

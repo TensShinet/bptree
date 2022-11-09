@@ -74,38 +74,52 @@ func (t *Tree) find(key int) (*Node, int) {
 
 	for !node.isLeaf {
 		// Find the smallest key bigger than this key.
-		// TODO: binary search?
-		i := 0
-		for ; i < len(node.keys); i++ {
-			if node.keys[i] > key {
-				break
+		l, r := 0, len(node.keys)
+		for l < r {
+			m := (r-l)/2 + l
+			if node.keys[m] > key {
+				r = m
+			} else {
+				l = m + 1
 			}
 		}
-		node = node.values[i]
+		node = node.values[l]
 	}
 
 	// Now the node is a Leaf Node. And the key will not in the next sibling node.
 	// Because the next sibling first key is bigger than the key.
 
 	// Scan the node keys and find this key.
-	// TODO: binary search?
-	for i := 0; i < len(node.keys); i++ {
-		if node.keys[i] == key {
-			return node, i
+	l, r := 0, len(node.keys)-1
+	for l < r {
+		m := (r-l)/2 + l
+		if node.keys[m] >= key {
+			r = m
+		} else {
+			l = m + 1
 		}
+	}
+
+	if r != -1 && node.keys[r] == key {
+		return node, r
 	}
 
 	return node, -1
 }
 
 func (t *Tree) insertInLeafNode(n *Node, key int, value any) {
-	// TODO: binary search?
-	i := 0
-	for ; i < len(n.keys); i++ {
-		if key <= n.keys[i] {
-			break
+
+	l, r := 0, len(n.keys)
+	for l < r {
+		m := (r-l)/2 + l
+		if n.keys[m] >= key {
+			r = m
+		} else {
+			l = m + 1
 		}
 	}
+
+	i := l
 
 	if i == len(n.keys) {
 		n.insertLeafKV(i, key, computeLeafValuesIndex(i), value)
